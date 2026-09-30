@@ -375,7 +375,8 @@
             </div>
             <div class="question-block">
                 <div class="q-title"><span class="q-icon">Q.03</span>第三の謎</div>
-                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き「線(文字)」を見つけ出せ。</p>
+                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き <span style="font-family:'Cinzel',serif;">'N'</span> または「線(文字)」を見つけ出せ。
+                </p>
                 <input type="text" id="ans3" placeholder="答えを入力">
                 <div id="msg3" class="message"></div>
             </div>
@@ -415,8 +416,8 @@
 
     <!-- MindAR カメラ空間 -->
     <div id="ar-camera-container">
-        <a-scene id="aframe-scene" mindar-image="imageTargetSrc: targets.mind;" vr-mode-ui="enabled: false"
-            device-orientation-permission-ui="enabled: false">
+        <a-scene id="aframe-scene" mindar-image="imageTargetSrc: targets.mind; filterMinCF:0.0001; filterBeta:0.001;"
+            vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
             <a-assets></a-assets>
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
@@ -564,44 +565,46 @@
             }
         }
 
-        // --- マーカーを検出したときのイベント処理 ---
-        const yotsubaTargetEntity = document.querySelector('#yotsuba-target');
-        const roseTargetEntity = document.querySelector('#rose-target');
-        const flashOverlay = document.querySelector('#flash-overlay');
-        const uiMessage = document.querySelector('#ui-message');
+        // --- A-Frameの初期化完了後にイベントリスナーを安全に設定 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const yotsubaTargetEntity = document.querySelector('#yotsuba-target');
+            const roseTargetEntity = document.querySelector('#rose-target');
+            const flashOverlay = document.querySelector('#flash-overlay');
+            const uiMessage = document.querySelector('#ui-message');
 
-        // 1. よつばラマーカーを検出したとき（3Dやフラッシュ演出を表示したまま自動でクイズページへ進む）
-        yotsubaTargetEntity.addEventListener('targetFound', () => {
-            if (currentActiveMode !== 'yotsuba') return;
-            console.log("よつばラマーカー検出 -> 演出表示後にクイズページへ自動遷移");
+            if (yotsubaTargetEntity) {
+                yotsubaTargetEntity.addEventListener('targetFound', () => {
+                    if (currentActiveMode !== 'yotsuba') return;
+                    console.log("よつばラマーカー検出 -> 演出表示後にクイズページへ自動遷移");
 
-            // 3Dオブジェクトが表示されている状態でフラッシュとメッセージ演出を発動
-            flashOverlay.classList.add('active');
-            uiMessage.textContent = "よつばラを検出しました!<br>謎解きページへ移動します...";
-            uiMessage.style.display = 'block';
+                    flashOverlay.classList.add('active');
+                    uiMessage.textContent = "よつばラを検出しました!<br>謎解きページへ移動します...";
+                    uiMessage.style.display = 'block';
 
-            // 3Dが出現した余韻をしっかり見せるため、少し時間（2.2秒後）を置いてから画面を自動切替
-            setTimeout(() => {
-                closeWebAR();
-                document.getElementById('ar-scan-section').style.display = 'none';
-                document.getElementById('quiz-form').style.display = 'block';
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 2200);
-        });
+                    setTimeout(() => {
+                        closeWebAR();
+                        document.getElementById('ar-scan-section').style.display = 'none';
+                        document.getElementById('quiz-form').style.display = 'block';
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }, 2200);
+                });
+            }
 
-        // 2. 薔薇マーカーを検出したとき（従来の演出をそのまま維持）
-        roseTargetEntity.addEventListener('targetFound', () => {
-            if (currentActiveMode !== 'rose') return;
-            console.log("バラのマーカー検出: 時空同期スタート");
-            flashOverlay.classList.add('active');
-            uiMessage.textContent = "時空同期完了:【時】【刻】【動】<br>公園の時間が動き出す...!";
-            uiMessage.style.display = 'block';
-        });
+            if (roseTargetEntity) {
+                roseTargetEntity.addEventListener('targetFound', () => {
+                    if (currentActiveMode !== 'rose') return;
+                    console.log("バラのマーカー検出: 時空同期スタート");
+                    flashOverlay.classList.add('active');
+                    uiMessage.textContent = "時空同期完了:【時】【刻】【動】<br>公園の時間が動き出す...!";
+                    uiMessage.style.display = 'block';
+                });
 
-        roseTargetEntity.addEventListener('targetLost', () => {
-            if (currentActiveMode !== 'rose') return;
-            flashOverlay.classList.remove('active');
-            uiMessage.style.display = 'none';
+                roseTargetEntity.addEventListener('targetLost', () => {
+                    if (currentActiveMode !== 'rose') return;
+                    flashOverlay.classList.remove('active');
+                    uiMessage.style.display = 'none';
+                });
+            }
         });
     </script>
 </body>

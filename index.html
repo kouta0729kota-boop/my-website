@@ -287,15 +287,15 @@
         /* UIメッセージのスタイル */
         #ui-message {
             position: fixed;
-            bottom: 90px;
+            bottom: 100px;
             left: 50%;
             transform: translateX(-50%);
             background: rgba(0, 0, 0, 0.7);
             color: #FFD700;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-family: sans-serif;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: bold;
             letter-spacing: 1px;
             z-index: 10002;
@@ -321,7 +321,7 @@
 
     <!-- HTML/CSSによる演出レイヤー -->
     <div id="flash-overlay"></div>
-    <div id="ui-message">よつばラを検出しました!<br>謎解きページへ移動します...</div>
+    <div id="ui-message">よつばラを検出しました!</div>
 
     <!-- メインの謎解き手帖カード -->
     <div class="flyer-card" id="main-content-card">
@@ -347,8 +347,8 @@
                 <div class="news-title">時空ロック中</div>
                 <p class="ar-instruction">
                     QRコードの読み込みに成功しました! <br>
-                    続いて、公園の巨木の根元にある<strong>「四つ葉のマーカー画像」</strong>をARカメラで捉えて、よつばラを召喚してください。<br>
-                    <span style="font-size: 0.8rem; color: #705342;">※カメラがマーカーを捉えると、3Dが出現して自動的に問題ページへ進みます。</span>
+                    続いて、公園の巨木の根元にある<strong><span>「四つ葉のマーカー画像」</span></strong>をARカメラで捉えて、よつばラを召喚してください。<br>
+                    <span style="font-size: 0.8rem; color: #705342;">※マーカーを捉えると3Dが表示され、ボタンから謎解きへ進めます。</span>
                 </p>
                 <button class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
             </div>
@@ -450,9 +450,16 @@
             </a-entity>
         </a-scene>
 
-        <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10000;">
+        <!-- AR画面の下部に配置するコントロールボタン群 -->
+        <div id="ar-controls"
+            style="position: absolute; bottom: 25px; left: 50%; transform: translateX(-50%); z-index: 10000; width: 90%; max-width: 400px; display: flex; flex-direction: column; gap: 10px;">
+            <!-- よつばラ検出後に現れる「謎を解く」ボタン -->
+            <button id="to-quiz-btn" onclick="goToQuizFromAR()"
+                style="display: none; padding: 16px; background: #2e6b3e; color: #fcf4df; border: 2px solid #fcf4df; border-radius: 8px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(0,0,0,0.5);">謎を解く（問題ページへ）</button>
+
+            <!-- カメラを閉じるボタン -->
             <button onclick="closeWebAR()"
-                style="padding: 12px 24px; background: #a83232; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">ARカメラを閉じる</button>
+                style="padding: 12px 24px; background: #a83232; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">ARカメラを閉じる</button>
         </div>
     </div>
 
@@ -493,6 +500,9 @@
             document.getElementById('main-content-card').style.display = 'none';
             document.getElementById('ar-camera-container').style.display = 'block';
 
+            // 初期状態では「謎を解く」ボタンは非表示（よつばラモードかつ検出されるまで）
+            document.getElementById('to-quiz-btn').style.display = 'none';
+
             const sceneEl = document.getElementById('aframe-scene');
             const yotsubaTarget = document.getElementById('yotsuba-target');
             const roseTarget = document.getElementById('rose-target');
@@ -514,6 +524,14 @@
             document.getElementById('main-content-card').style.display = 'block';
             document.getElementById('flash-overlay').classList.remove('active');
             document.getElementById('ui-message').style.display = 'none';
+        }
+
+        // AR画面から手動で謎解きページへ遷移する関数
+        function goToQuizFromAR() {
+            closeWebAR();
+            document.getElementById('ar-scan-section').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // 謎解きの答え
@@ -573,21 +591,20 @@
             const uiMessage = document.querySelector('#ui-message');
 
             if (yotsubaTargetEntity) {
+                // よつばラマーカーを検出したとき
                 yotsubaTargetEntity.addEventListener('targetFound', () => {
                     if (currentActiveMode !== 'yotsuba') return;
-                    console.log("よつばラマーカー検出 -> 演出表示後にクイズページへ自動遷移");
+                    console.log("よつばラマーカー検出: 3D継続表示 & 謎を解くボタン出現");
 
                     flashOverlay.classList.add('active');
-                    uiMessage.textContent = "よつばラを検出しました!<br>謎解きページへ移動します...";
+                    uiMessage.textContent = "よつばラを検出しました!";
                     uiMessage.style.display = 'block';
 
-                    setTimeout(() => {
-                        closeWebAR();
-                        document.getElementById('ar-scan-section').style.display = 'none';
-                        document.getElementById('quiz-form').style.display = 'block';
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }, 2200);
+                    // 3Dモデルを表示しつつ、下に「謎を解く」ボタンを表示させる
+                    document.getElementById('to-quiz-btn').style.display = 'block';
                 });
+
+                // マーカーが見えなくなっても3D表示（またはフラッシュ演出）の状態を保つため targetLost は自動移行させない
             }
 
             if (roseTargetEntity) {

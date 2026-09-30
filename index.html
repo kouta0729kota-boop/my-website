@@ -304,7 +304,7 @@
             text-align: center;
         }
 
-        /* ARカメラ起動中のコンテナ（薔薇マーカー対応版） */
+        /* ARカメラ起動中のコンテナ */
         #ar-camera-container {
             display: none;
             position: fixed;
@@ -321,7 +321,7 @@
 
     <!-- HTML/CSSによる演出レイヤー -->
     <div id="flash-overlay"></div>
-    <div id="ui-message">時空同期完了:【時】【刻】【動】<br>公園の時間が動き出す...!</div>
+    <div id="ui-message">よつばラを検出しました!<br>謎解きページへ移動します...</div>
 
     <!-- メインの謎解き手帖カード -->
     <div class="flyer-card" id="main-content-card">
@@ -348,7 +348,7 @@
                 <p class="ar-instruction">
                     QRコードの読み込みに成功しました! <br>
                     続いて、公園の巨木の根元にある<strong>「四つ葉のマーカー画像」</strong>をARカメラで捉えて、よつばラを召喚してください。<br>
-                    <span style="font-size: 0.8rem; color: #705342;">※安全のため、必ずベンチに座って操作してください。</span>
+                    <span style="font-size: 0.8rem; color: #705342;">※カメラがマーカーを捉えると、自動的に問題ページへ進みます。</span>
                 </p>
                 <button class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
             </div>
@@ -413,45 +413,37 @@
         </div>
     </div>
 
-    <!-- MindAR カメラ空間（よつばラ用 or 薔薇の3D演出用をモード切替） -->
+    <!-- MindAR カメラ空間 -->
     <div id="ar-camera-container">
-        <!-- A-Frame シーン（初期はよつばラ用ファイル名を設定。JS動的変更対応） -->
         <a-scene id="aframe-scene" mindar-image="imageTargetSrc: targets.mind;" vr-mode-ui="enabled: false"
             device-orientation-permission-ui="enabled: false">
             <a-assets></a-assets>
             <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-            <!-- モード1: よつばラターゲット (targetIndex: 0) -->
+            <!-- モード1: よつばラターゲット -->
             <a-entity id="yotsuba-target" mindar-image-target="targetIndex: 0">
                 <a-plane color="#2e6b3e" opacity="0.9" height="0.6" width="0.6" rotation="0 0 0"></a-plane>
-                <a-text value=" よつばラ \n[ タップして問題を解く ]" color="#fcf4df" align="center" position="0 0 0.05"
-                    scale="0.4 0.4 0.4" class="clickable" onclick="onYotsubaraTapped()"></a-text>
+                <a-text value=" よつばラ 登場！\n 謎が解放されます..." color="#fcf4df" align="center" position="0 0 0.05"
+                    scale="0.4 0.4 0.4"></a-text>
             </a-entity>
 
-            <!-- モード2: 薔薇と時計の歯車ターゲット (targetIndex: 0、必要に応じて変更) -->
+            <!-- モード2: 薔薇と時計の歯車ターゲット（ニュース用・演出そのまま） -->
             <a-entity id="rose-target" mindar-image-target="targetIndex: 0" visible="false">
-                <!-- 1. 光る「記憶のバラ」の立体表現 -->
                 <a-sphere position="0 0 0" radius="0.15" color="#ff3366"
                     material="emissive: #ff1493; emissiveIntensity: 0.8"
                     animation="property: position; to: 0 0.4 0; dir: alternate; dur: 1200; loop: true"></a-sphere>
-
-                <!-- 2. 時計の歯車 -->
                 <a-torus position="0 0 -0.2" radius="0.4" radius-tubular="0.03" color="#DAA520" metalness="0.9"
                     roughness="0.2"
                     animation="property: rotation; to: 0 0 360; dur: 4000; easing: linear; loop: true"></a-torus>
                 <a-torus position="0 0 -0.2" radius="0.25" radius-tubular="0.02" color="#CD7F32" metalness="0.9"
                     roughness="0.2"
                     animation="property: rotation; to: 0 0 -360; dur: 3000; easing: linear; loop: true"></a-torus>
-
-                <!-- 中央の時計盤面風プレート -->
                 <a-circle position="0 0 -0.22" radius="0.2" color="#FFF8DC" material="side: double">
                     <a-text value="12" position="-0.04 0.1 0" color="#333" scale="0.4 0.4 0.4"></a-text>
                     <a-text value="3" position="0.08 0 0" color="#333" scale="0.4 0.4 0.4"></a-text>
                     <a-text value="6" position="-0.02 -0.1 0" color="#333" scale="0.4 0.4 0.4"></a-text>
                     <a-text value="9" position="-0.12 0 0" color="#333" scale="0.4 0.4 0.4"></a-text>
                 </a-circle>
-
-                <!-- 3. 浮遊するテキスト演出 -->
                 <a-text value="TIME RESTORED" position="0 1.3 -0.2" align="center" color="#00ffff" scale="0.8 0.8 0.8"
                     animation="property: position; to: 0 1.4 -0.2; dir: alternate; dur: 1000; loop: true"></a-text>
             </a-entity>
@@ -465,6 +457,7 @@
 
     <script>
         let html5QrCode = null;
+        let currentActiveMode = 'yotsuba'; // 現在のARモードを保持
 
         // QRリーダーを起動する関数
         function startQRScanner() {
@@ -493,8 +486,9 @@
             );
         }
 
-        // WebARカメラを起動する（'yotsuba' または 'rose' を指定）
+        // WebARカメラを起動する
         function startWebAR(mode) {
+            currentActiveMode = mode;
             document.getElementById('main-content-card').style.display = 'none';
             document.getElementById('ar-camera-container').style.display = 'block';
 
@@ -503,12 +497,10 @@
             const roseTarget = document.getElementById('rose-target');
 
             if (mode === 'rose') {
-                // ニュース画面からの薔薇マーカーモード
                 sceneEl.setAttribute('mindar-image', 'imageTargetSrc: ./assets/rose-marker.mind;');
                 yotsubaTarget.setAttribute('visible', 'false');
                 roseTarget.setAttribute('visible', 'true');
             } else {
-                // 通常のよつばラモード
                 sceneEl.setAttribute('mindar-image', 'imageTargetSrc: targets.mind;');
                 yotsubaTarget.setAttribute('visible', 'true');
                 roseTarget.setAttribute('visible', 'false');
@@ -519,19 +511,8 @@
         function closeWebAR() {
             document.getElementById('ar-camera-container').style.display = 'none';
             document.getElementById('main-content-card').style.display = 'block';
-            // エフェクトもリセット
             document.getElementById('flash-overlay').classList.remove('active');
             document.getElementById('ui-message').style.display = 'none';
-        }
-
-        // AR上の「よつばラ」をタップしたときの処理
-        function onYotsubaraTapped() {
-            alert("よつばラをキャッチしました! クイズのページへ進みます。");
-            document.getElementById('ar-camera-container').style.display = 'none';
-            document.getElementById('main-content-card').style.display = 'block';
-            document.getElementById('ar-scan-section').style.display = 'none';
-            document.getElementById('quiz-form').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         // 謎解きの答え
@@ -583,19 +564,40 @@
             }
         }
 
-        // 薔薇マーカーを検出したときの演出イベント連携
+        // --- マーカーを検出したときのイベント処理 ---
+        const yotsubaTargetEntity = document.querySelector('#yotsuba-target');
         const roseTargetEntity = document.querySelector('#rose-target');
         const flashOverlay = document.querySelector('#flash-overlay');
         const uiMessage = document.querySelector('#ui-message');
 
+        // 1. よつばラマーカーを検出したとき（自動でクイズページへ進む）
+        yotsubaTargetEntity.addEventListener('targetFound', () => {
+            if (currentActiveMode !== 'yotsuba') return;
+            console.log("よつばラマーカー検出 -> クイズページへ自動遷移");
+
+            flashOverlay.classList.add('active');
+            uiMessage.textContent = "よつばラを検出しました!<br>謎解きページへ移動します...";
+            uiMessage.style.display = 'block';
+
+            setTimeout(() => {
+                closeWebAR();
+                document.getElementById('ar-scan-section').style.display = 'none';
+                document.getElementById('quiz-form').style.display = 'block';
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 1200);
+        });
+
+        // 2. 薔薇マーカーを検出したとき（従来の演出をそのまま維持）
         roseTargetEntity.addEventListener('targetFound', () => {
+            if (currentActiveMode !== 'rose') return;
             console.log("バラのマーカー検出: 時空同期スタート");
             flashOverlay.classList.add('active');
+            uiMessage.textContent = "時空同期完了:【時】【刻】【動】<br>公園の時間が動き出す...!";
             uiMessage.style.display = 'block';
         });
 
         roseTargetEntity.addEventListener('targetLost', () => {
-            console.log("マーカーロスト");
+            if (currentActiveMode !== 'rose') return;
             flashOverlay.classList.remove('active');
             uiMessage.style.display = 'none';
         });

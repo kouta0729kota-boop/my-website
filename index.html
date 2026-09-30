@@ -406,32 +406,32 @@
             html5QrCode = new Html5Qrcode("qr-reader");
             
             html5QrCode.start(
-                { facingMode: "environment" }, // 外側のカメラを使用
-                {
-                    fps: 10,
-                    qrbox: { width: 250, height: 250 }
-                },
-                (decodedText, decodedResult) => {
-                    // QRコード読み取り成功時の処理
-                    alert("✨ QRコードの読み取りに成功しました！");
-                    
-                    // カメラを停止
-                    html5QrCode.stop().then(() => {
-                        // 次のARスキャン画面へ切り替え
-                        document.getElementById('qr-scan-section').style.display = 'none';
-                        document.getElementById('ar-scan-section').style.display = 'block';
-                    }).catch(err => {
-                        console.error("カメラの停止に失敗しました", err);
-                    });
-                },
-                (errorMessage) => {
-                    // 読み取り中のエラー（スキャン中は頻繁に出るため基本はそのままでOK）
-                }
-            ).catch(err => {
-                alert("カメラの起動に失敗しました。カメラの権限を確認してください。");
-                startBtn.style.display = 'block';
-                readerDiv.style.display = 'none';
-            });
+    { facingMode: "environment" },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText, decodedResult) => {
+        // QRコードの読み取りに成功した場合の処理
+        console.log(`Code matched = ${decodedText}`);
+        
+        // カメラを停止してからページを移動する
+        html5QrCode.stop().then(() => {
+            // 読み取ったテキストがURL（httpから始まるなど）の場合、そのページへジャンプ
+            if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                window.location.href = decodedText;
+            } else {
+                // URLではなく、これまで通りのアプリ内セクション切り替えを行いたい場合
+                alert("QRコードの読み取りに成功しました！");
+                document.getElementById('qr-scan-section').style.display = 'none';
+                document.getElementById('ar-scan-section').style.display = 'block';
+            }
+        }).catch(err => {
+            console.error("カメラの停止に失敗しました", err);
+        });
+    },
+    (errorMessage) => {
+        // スキャン中のエラーや未検出は無視してOK
+    }
+);
+                
         }
 
         // WebARカメラを起動する

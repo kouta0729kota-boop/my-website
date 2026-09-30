@@ -294,7 +294,7 @@
             <div class="scanner-box">
                 <div class="news-title">時空ロック中 (ARスキャン)</div>
                 <p class="ar-instruction">
-                    QRコード読込成功！<br>下の枠内にカメラを起動し、<strong>「四つ葉のマーカー画像」</strong>にかざしてください。
+                    QRコード読込成功！<br>下の枠内にカメラを起動し、<strong>「palanARのマーカー画像」</strong>にかざしてください。
                 </p>
 
                 <!-- カードの真ん中にインライン表示されるARカメラ領域 -->
@@ -327,10 +327,15 @@
                 <!-- AR起動ボタン -->
                 <button id="start-ar-btn" class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
 
-                <!-- 検出後に下部に現れる「謎を解く」ボタン -->
+                <!-- 検出後に現れる、あるいは強制的に進む「謎を解く」ボタン -->
                 <button id="to-quiz-btn" class="submit-all-btn"
-                    style="display: none; background-color: #b8860b; border-color: #8b6508;"
+                    style="display: none; background-color: #b8860b; border-color: #8b6508; margin-top: 10px;"
                     onclick="goToQuizFromAR()">✨ 謎を解く（問題ページへ進む） ✨</button>
+
+                <!-- マーカーが反応しにくい時のための救済ボタン（常に表示） -->
+                <button class="submit-all-btn"
+                    style="background-color: #705342; border-color: #4a3b32; font-size: 0.9rem; padding: 10px; margin-top: 8px;"
+                    onclick="goToQuizFromAR()">（テスト用）読み込めない場合はこちらから進む</button>
             </div>
         </div>
 
@@ -445,8 +450,15 @@
             }
         }
 
-        // 謎解きページへ進むボタン
+        // 3D出現後にボタンを押すとARを閉じて元のサイト（謎解きページ）に戻る処理
         function goToQuizFromAR() {
+            // カメラやARシーンを非表示にしてリソースを解放する
+            const inlineContainer = document.getElementById('inline-ar-container');
+            if (inlineContainer) {
+                inlineContainer.innerHTML = ""; // カメラの映像を完全に停止させる
+            }
+
+            // ARセクションを隠して、元のVSCodeで確認している謎解き質問ページを表示する
             document.getElementById('ar-scan-section').style.display = 'none';
             document.getElementById('quiz-form').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -510,7 +522,6 @@
                 yotsubaTargetEntity.addEventListener('targetFound', () => {
                     if (currentActiveMode !== 'yotsuba') return;
                     console.log("よつばラマーカー検出: 謎を解くボタン出現");
-                    // マーカーを検出したら、下部に「謎を解く」ボタンを表示
                     document.getElementById('to-quiz-btn').style.display = 'block';
                 });
             }

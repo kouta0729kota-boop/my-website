@@ -348,7 +348,7 @@
                 <p class="ar-instruction">
                     QRコードの読み込みに成功しました! <br>
                     続いて、公園の巨木の根元にある<strong>「四つ葉のマーカー画像」</strong>をARカメラで捉えて、よつばラを召喚してください。<br>
-                    <span style="font-size: 0.8rem; color: #705342;">※カメラがマーカーを捉えると、自動的に問題ページへ進みます。</span>
+                    <span style="font-size: 0.8rem; color: #705342;">※カメラがマーカーを捉えると、3Dが出現して自動的に問題ページへ進みます。</span>
                 </p>
                 <button class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
             </div>
@@ -570,21 +570,23 @@
         const flashOverlay = document.querySelector('#flash-overlay');
         const uiMessage = document.querySelector('#ui-message');
 
-        // 1. よつばラマーカーを検出したとき（自動でクイズページへ進む）
+        // 1. よつばラマーカーを検出したとき（3Dやフラッシュ演出を表示したまま自動でクイズページへ進む）
         yotsubaTargetEntity.addEventListener('targetFound', () => {
             if (currentActiveMode !== 'yotsuba') return;
-            console.log("よつばラマーカー検出 -> クイズページへ自動遷移");
+            console.log("よつばラマーカー検出 -> 演出表示後にクイズページへ自動遷移");
 
+            // 3Dオブジェクトが表示されている状態でフラッシュとメッセージ演出を発動
             flashOverlay.classList.add('active');
             uiMessage.textContent = "よつばラを検出しました!<br>謎解きページへ移動します...";
             uiMessage.style.display = 'block';
 
+            // 3Dが出現した余韻をしっかり見せるため、少し時間（2.2秒後）を置いてから画面を自動切替
             setTimeout(() => {
                 closeWebAR();
                 document.getElementById('ar-scan-section').style.display = 'none';
                 document.getElementById('quiz-form').style.display = 'block';
                 window.scrollTo({ top: 0, behavior: 'smooth' });
-            }, 1200);
+            }, 2200);
         });
 
         // 2. 薔薇マーカーを検出したとき（従来の演出をそのまま維持）

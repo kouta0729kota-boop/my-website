@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ストップ・ウォッチ・ガーデン 〜よつばラで時空をもどせ！〜</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+    
+    <!-- MindAR & A-Frame (WebARライブラリ) の読み込み -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+
+    <!-- QRコードリーダー用ライブラリ (html5-qrcode) の読み込み -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
+
+    <style>
+        body {
+            font-family: "Zen Maru Gothic", sans-serif;
+            background-color: #3b2c24;
+            color: #4a3b32;
+            margin: 0;
+            padding: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .flyer-card {
+            width: 100%;
+            max-width: 550px;
+            background: #fcf4df;
+            border-radius: 6px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6),
+                        inset 0 0 40px rgba(184, 134, 11, 0.15);
+            border: 8px solid #5a3825;
+            outline: 3px dashed #b8860b;
+            outline-offset: -6px;
+            padding: 30px 20px;
+            box-sizing: border-box;
+            position: relative;
+            z-index: 10;
+        }
+
+        .flyer-header {
+            text-align: center;
+            border-bottom: 2px solid #b8860b;
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+        }
+
+        .header-sub {
+            font-family: 'Cinzel', serif;
+            font-size: 0.9rem;
+            color: #b8860b;
+            letter-spacing: 0.15em;
+            margin-bottom: 5px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: #4a2e18;
+            margin: 0;
+            letter-spacing: 0.05em;
+            text-shadow: 1px 1px 0px #edd5b3;
+        }
+
+        .flyer-message {
+            font-size: 0.9rem;
+            color: #705342;
+            margin-top: 8px;
+            font-weight: bold;
+        }
+
+        .scanner-box {
+            background-color: #f7ebcc;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .news-title {
+            color: #7a431d;
+            font-weight: bold;
+            font-size: 1.1rem;
+            border-bottom: 1px dashed #b8860b;
+            padding-bottom: 6px;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .ar-instruction {
+            font-size: 0.95rem;
+            color: #4a2e18;
+            margin-bottom: 15px;
+            line-height: 1.6;
+            text-align: center;
+        }
+
+        .submit-all-btn {
+            width: 100%;
+            padding: 16px;
+            background-color: #2e6b3e;
+            color: #fcf4df;
+            border: 2px solid #1e4628;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-family: "Zen Maru Gothic", sans-serif;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: all 0.1s;
+            margin-top: 10px;
+            letter-spacing: 0.05em;
+        }
+
+        .submit-all-btn:hover {
+            background-color: #1e4628;
+        }
+
+        /* セクション切り替え */
+        #qr-scan-section { display: block; }
+        #ar-scan-section { display: none; }
+        #quiz-form { display: none; animation: fadeIn 0.8s ease; }
+
+        .question-block {
+            background-color: #f7ebcc;
+            border: 2px solid #b8860b;
+            border-radius: 8px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .q-title {
+            font-size: 1.05rem;
+            color: #7a431d;
+            font-weight: bold;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+        }
+
+        .q-icon {
+            background-color: #7a431d;
+            color: #fcf4df;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-size: 0.85rem;
+            margin-right: 8px;
+            font-family: 'Cinzel', serif;
+        }
+
+        p {
+            font-size: 0.98rem;
+            line-height: 1.7;
+            margin: 0 0 12px 0;
+            color: #3b2c24;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-family: "Zen Maru Gothic", sans-serif;
+            background-color: #fffdf7;
+            border: 2px solid #b8860b;
+            border-radius: 4px;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+            color: #3b2c24;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        input[type="text"]:focus {
+            outline: none;
+            border-color: #7a431d;
+            background-color: #fff;
+        }
+
+        input.correct-input {
+            background-color: #e5f2e5;
+            border-color: #2e6b3e;
+            color: #2e6b3e;
+        }
+
+        .message {
+            font-size: 0.85rem;
+            font-weight: bold;
+            text-align: center;
+            min-height: 1.2em;
+        }
+
+        .error { color: #a83232; }
+        .success { color: #2e6b3e; }
+
+        #unlock-section {
+            display: none;
+            background-color: #f7ebcc;
+            border: 2px dashed #b8860b;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            animation: fadeIn 0.6s ease;
+        }
+
+        #next-page-section {
+            display: none;
+            text-align: left;
+            padding: 10px 0;
+            animation: fadeIn 0.6s ease;
+        }
+
+        .news-box {
+            background-color: #fffdf7;
+            border: 2px solid #b8860b;
+            border-radius: 6px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 0.95rem;
+            line-height: 1.8;
+        }
+
+        .ar-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            background-color: #2e6b3e;
+            color: #fff;
+            border: 2px solid #1e4628;
+            border-radius: 4px;
+            font-size: 1.1rem;
+            font-family: "Zen Maru Gothic", sans-serif;
+            font-weight: bold;
+            text-align: center;
+            text-decoration: none;
+            box-sizing: border-box;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        #next-page-section h2 {
+            color: #7a431d;
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* ARカメラ起動中のコンテナ */
+        #ar-camera-container {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- メインの謎解き手帖カード -->
+    <div class="flyer-card" id="main-content-card">
+        <div class="flyer-header">
+            <div class="header-sub">STOP WATCH GARDEN</div>
+            <h1>ストップ・ウォッチ・ガーデン</h1>
+            <div class="flyer-message">〜よつばラで時空をもどせ！〜</div>
+        </div>
+        
+        <!-- STEP 0: 最初に出現するQRコードリーダー読み取り画面 -->
+        <div id="qr-scan-section">
+            <div class="scanner-box">
+                <div class="news-title">📷 最初のQRコードを読み込む</div>
+                <p class="ar-instruction">
+                    手帖や看板にある最初のQRコードをカメラで読み取ってください。
+                </p>
+                <!-- QRリーダーを表示するカメラ枠 -->
+                <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto; display: none;"></div>
+                
+                <button class="submit-all-btn" id="start-qr-btn" onclick="startQRScanner()">
+                    📲 QRリーダーカメラを起動
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 1: QR読み込み成功後に進む「ARマーカー読み込み」セクション -->
+        <div id="ar-scan-section">
+            <div class="scanner-box">
+                <div class="news-title">🍀 時空ロック中 🍀</div>
+                <p class="ar-instruction">
+                    QRコードの読み込みに成功しました！<br>
+                    続いて、公園の巨木の根元にある<strong>「四つ葉のマーカー画像」</strong>をARカメラで捉えて、よつばラを召喚してください。<br>
+                    <span style="font-size: 0.8rem; color: #705342;">※安全のため、必ずベンチに座って操作してください。</span>
+                </p>
+                
+                <button class="submit-all-btn" onclick="startWebAR()">
+                    📷 WebARカメラを起動する
+                </button>
+            </div>
+        </div>
+
+        <!-- STEP 2: クイズ問題 -->
+        <div id="quiz-form">
+            <div style="text-align: center; margin-bottom: 15px; color: #2e6b3e; font-weight: bold; font-size: 0.95rem;">
+                ✔ ARよつばラの力により、すべての謎が解放されました！
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-icon">Q.01</span>第一の謎</div>
+                <p>水辺の賢者、ラッコ。その傍らに佇み、休むことなく疾走し続ける「者」の名を記せ。</p>
+                <input type="text" id="ans1" placeholder="答えを入力">
+                <div id="msg1" class="message"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-icon">Q.02</span>第二の謎</div>
+                <p>円卓の集会に耳を澄ませ。<br>
+                ひとつ、皿を掲げし大事な生命。<br>
+                ふたつ、牙を剥くオオカミに狙われし耳長。<br>
+                みっつ、競い走る者たち、そして「起きろ」と叫ばれる者。<br>
+                ――ならば、残されたもうひとつの円を統べる動物とは何か？</p>
+                <input type="text" id="ans2" placeholder="答えを入力">
+                <div id="msg2" class="message"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-icon">Q.03</span>第三の謎</div>
+                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き「線（文字）」を見つけ出せ。</p>
+                <input type="text" id="ans3" placeholder="答えを入力">
+                <div id="msg3" class="message"></div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-icon">Q.04</span>第四の謎</div>
+                <p>とある施設の白き壁面。そこには起立する者、杖をつく者、そして並び立つ親子の姿が刻まれている。<br>
+                その足元に寄り添うように咲き誇る、鮮やかなピンクの花の名は？</p>
+                <input type="text" id="ans4" placeholder="答えを入力">
+                <div id="msg4" class="message"></div>
+            </div>
+
+            <button class="submit-all-btn" onclick="checkAllAnswers()" style="background-color: #7a431d; border-color: #5a3825;">すべての答えを判定する</button>
+        </div>
+
+        <!-- STEP 3: 全問正解後の合言葉 -->
+        <div id="unlock-section">
+            <h3 style="color: #7a431d; margin-top:0;">🎉 全問正解！最後の扉が開く</h3>
+            <p style="font-size:0.9rem;">すべての謎が解けました。時空を動かすひらがな3文字の合言葉（<strong>うつぼ</strong>）を入力してください。</p>
+            <input type="text" id="passcode" placeholder="ひらがなで入力">
+            <button class="submit-all-btn" onclick="checkPasscode()">時空を動かす</button>
+            <div id="passcode-msg" class="message" style="margin-top:8px;"></div>
+        </div>
+
+        <!-- STEP 4: 最終画面 -->
+        <div id="next-page-section">
+            <h2>🌳 靱公園 時空速報ニュース 🌳</h2>
+            <div class="news-box">
+                <div class="news-title">【特設：特別調査員へ告ぐ】</div>
+                <p>
+                    大きな木がどうやらこの謎解きを終わらせる『ニュース』をするみたい。見に行ってみよう。<br><br>
+                    ニュースの名札の近くに薔薇のバッチがあるよ。それをカメラでかざしてね！
+                </p>
+            </div>
+            <a href="#" class="ar-btn" onclick="alert('【ARカメラ起動】記念銅像合成モードへ移行します！'); return false;">📷 記念銅像カメラを起動する</a>
+        </div>
+    </div>
+
+    <!-- MindAR カメラ空間 -->
+    <div id="ar-camera-container">
+        <a-scene mindar-image="imageTargetSrc: targets.mind;" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+            <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+            
+            <a-entity mindar-image-target="targetIndex: 0">
+                <a-plane color="#2e6b3e" opacity="0.9" position="0 0 0" height="0.6" width="0.6" rotation="0 0 0"></a-plane>
+                <a-text value="🍀 よつばラ 🍀\n[ タップして問題を解く ]" color="#fcf4df" align="center" position="0 0 0.05" scale="0.4 0.4 0.4" class="clickable" onclick="onYotsubaraTapped()"></a-text>
+            </a-entity>
+        </a-scene>
+        
+        <div style="position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10000;">
+            <button onclick="closeWebAR()" style="padding: 12px 24px; background: #a83232; color: white; border: none; border-radius: 8px; font-weight: bold; font-size: 1rem; cursor: pointer;">ARカメラを閉じる</button>
+        </div>
+    </div>
+
+    <script>
+        let html5QrCode = null;
+
+        // QRリーダーを起動する関数
+        function startQRScanner() {
+            const readerDiv = document.getElementById('qr-reader');
+            const startBtn = document.getElementById('start-qr-btn');
+            
+            readerDiv.style.display = 'block';
+            startBtn.style.display = 'none';
+
+            html5QrCode = new Html5Qrcode("qr-reader");
+            
+            html5QrCode.start(
+                { facingMode: "environment" }, // 外側のカメラを使用
+                {
+                    fps: 10,
+                    qrbox: { width: 250, height: 250 }
+                },
+                (decodedText, decodedResult) => {
+                    // QRコード読み取り成功時の処理
+                    alert("✨ QRコードの読み取りに成功しました！");
+                    
+                    // カメラを停止
+                    html5QrCode.stop().then(() => {
+                        // 次のARスキャン画面へ切り替え
+                        document.getElementById('qr-scan-section').style.display = 'none';
+                        document.getElementById('ar-scan-section').style.display = 'block';
+                    }).catch(err => {
+                        console.error("カメラの停止に失敗しました", err);
+                    });
+                },
+                (errorMessage) => {
+                    // 読み取り中のエラー（スキャン中は頻繁に出るため基本はそのままでOK）
+                }
+            ).catch(err => {
+                alert("カメラの起動に失敗しました。カメラの権限を確認してください。");
+                startBtn.style.display = 'block';
+                readerDiv.style.display = 'none';
+            });
+        }
+
+        // WebARカメラを起動する
+        function startWebAR() {
+            document.getElementById('main-content-card').style.display = 'none';
+            document.getElementById('ar-camera-container').style.display = 'block';
+        }
+
+        // WebARカメラを閉じる
+        function closeWebAR() {
+            document.getElementById('ar-camera-container').style.display = 'none';
+            document.getElementById('main-content-card').style.display = 'block';
+        }
+
+        // AR上の「よつばラ」をタップしたときの処理
+        function onYotsubaraTapped() {
+            alert("✨ よつばラをキャッチしました！クイズのページへ進みます。");
+            document.getElementById('ar-camera-container').style.display = 'none';
+            document.getElementById('main-content-card').style.display = 'block';
+            document.getElementById('ar-scan-section').style.display = 'none';
+            document.getElementById('quiz-form').style.display = 'block';
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // 謎解きの答え
+        const answers = {
+            1: "うま",
+            2: "たぬき",
+            3: "う",
+            4: "さくら"
+        };
+
+        function checkAllAnswers() {
+            let allCorrect = true;
+
+            for (let i = 1; i <= 4; i++) {
+                const userAns = document.getElementById('ans' + i).value.trim().toLowerCase();
+                const msg = document.getElementById('msg' + i);
+                const inputField = document.getElementById('ans' + i);
+
+                if (userAns === answers[i]) {
+                    msg.textContent = "【正解】";
+                    msg.className = "message success";
+                    inputField.classList.add('correct-input');
+                    inputField.disabled = true; 
+                } else {
+                    msg.textContent = "【不正解または空欄です】";
+                    msg.className = "message error";
+                    allCorrect = false;
+                }
+            }
+
+            if (allCorrect) {
+                document.getElementById('unlock-section').style.display = 'block';
+                document.getElementById('unlock-section').scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function checkPasscode() {
+            const passcodeVal = document.getElementById('passcode').value.trim();
+            const passcodeMsg = document.getElementById('passcode-msg');
+
+            if (passcodeVal === "うつぼ") {
+                passcodeMsg.textContent = "合言葉一致！時空が動き出します…！";
+                passcodeMsg.className = "message success";
+                setTimeout(() => {
+                    document.getElementById('quiz-form').style.display = 'none';
+                    document.getElementById('unlock-section').style.display = 'none';
+                    document.getElementById('next-page-section').style.display = 'block';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                }, 800);
+            } else {
+                passcodeMsg.textContent = "合言葉が違います（ひらがな3文字だよ）";
+                passcodeMsg.className =="message error";
+            }
+        }
+    </script>
+</body>
+</html>

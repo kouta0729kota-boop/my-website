@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ストップ・ウォッチ・ガーデン ~よつばラで時空をもどせ!~</title>
+    <title>ストップ・ウォッチ・ガーデン ~よつばラで時空をもどせ! ~</title>
     <link href="https://fonts.googleapis.com/css?family=Cinzel:wght@700&family=Zen+Maru+Gothic:wght@700&display=swap"
         rel="stylesheet">
     <!-- A-Frame ライブラリ -->
@@ -16,7 +16,7 @@
     <style>
         body {
             font-family: "Zen Maru Gothic", sans-serif;
-            background-color: #233b2c24;
+            background-color: #3233b224;
             color: #4a3b32;
             margin: 0;
             padding: 15px;
@@ -45,7 +45,7 @@
 
         .flyer-header {
             text-align: center;
-            border-bottom: 2px solid #b8860b;
+            border-bottom: 2px solid #68860b;
             padding-bottom: 20px;
             margin-bottom: 25px;
         }
@@ -75,7 +75,7 @@
 
         .scanner-box {
             background-color: #f7ebcc;
-            border: 2px solid #b8860b;
+            border: 2px solid #68860b;
             border-radius: 8px;
             padding: 20px;
             margin-bottom: 20px;
@@ -118,10 +118,9 @@
         }
 
         .submit-all-btn:hover {
-            background-color: #38804c;
+            background-color: #245230;
         }
 
-        /* セクション切り替え */
         #qr-scan-section {
             display: block;
         }
@@ -151,7 +150,7 @@
         }
 
         .question-block {
-            background-color: #f7ebcc;
+            background-color: #fffdf7;
             border: 2px solid #b8860b;
             border-radius: 8px;
             padding: 18px;
@@ -255,7 +254,6 @@
             cursor: pointer;
         }
 
-        /* カード内の真ん中にカメラを埋め込むスタイル */
         #inline-ar-container {
             display: none;
             width: 100%;
@@ -285,7 +283,7 @@
                 <div class="news-title">最初のQRコード読み込み</div>
                 <p class="ar-instruction">手帖や看板にある最初のQRコードをカメラで読み取ってください。</p>
                 <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto; display: none;"></div>
-                <button class="submit-all-btn" id="start-qr-btn" onclick="startQRScanner()">QRリーダーカメラを起動</button>
+                <button class="submit-all-btn" id="start-qr-btn" onclick="startQRScanner()">QR リーダーカメラを起動</button>
             </div>
         </div>
 
@@ -294,7 +292,7 @@
             <div class="scanner-box">
                 <div class="news-title">時空ロック中 (ARスキャン)</div>
                 <p class="ar-instruction">
-                    QRコード読込成功！<br>下の枠内にカメラを起動し、<strong>「palanARのマーカー画像」</strong>にかざしてください。
+                    QRコード読込成功!<br>下の枠内にカメラを起動し、<strong>「四つばのクローバーの画像」</strong>にかざしてください。
                 </p>
 
                 <!-- カードの真ん中にインライン表示されるARカメラ領域 -->
@@ -302,14 +300,17 @@
                     <a-scene id="aframe-scene" embedded
                         mindar-image="imageTargetSrc: targets.mind; filterMinCF:0.0001; filterBeta:0.001;"
                         vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-                        <a-assets></a-assets>
+                        <a-assets>
+                            <!-- ここに3Dモデル（glTF/glb）を登録します -->
+                            <a-asset-item id="yotsuba-model" src="7729a015a81275ac.glb"></a-asset-item>
+                        </a-assets>
                         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
                         <!-- モード1: よつばラターゲット -->
                         <a-entity id="yotsuba-target" mindar-image-target="targetIndex: 0">
-                            <a-plane color="#2e6b3e" opacity="0.9" height="0.6" width="0.6" rotation="0 0 0"></a-plane>
-                            <a-text value=" よつばラ 登場！" color="#fcf4df" align="center" position="0 0 0.05"
-                                scale="0.4 0.4 0.4"></a-text>
+                            <!-- 3Dモデルの配置 (スケールや位置、向きはモデルに合わせて調整してください) -->
+                            <a-gltf-model src="#yotsuba-model" position="0 0 0" scale="0.5 0.5 0.5"
+                                rotation="0 0 0"></a-gltf-model>
                         </a-entity>
 
                         <!-- モード2: 薔薇と時計の歯車ターゲット -->
@@ -318,7 +319,7 @@
                                 material="emissive: #ff1493; emissiveIntensity: 0.8"
                                 animation="property: position; to: 0 0.4 0; dir: alternate; dur: 1200; loop: true"></a-sphere>
                             <a-torus position="0 0 -0.2" radius="0.4" radius-tubular="0.03" color="#DAA520"
-                                metalness="0.9" roughness="0.2"
+                                roughness="0.2" metalness="0.9"
                                 animation="property: rotation; to: 0 0 360; dur: 4000; easing: linear; loop: true"></a-torus>
                         </a-entity>
                     </a-scene>
@@ -327,15 +328,15 @@
                 <!-- AR起動ボタン -->
                 <button id="start-ar-btn" class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
 
-                <!-- 検出後に現れる、あるいは強制的に進む「謎を解く」ボタン -->
+                <!-- 検出後に現れる「謎を解く」ボタン -->
                 <button id="to-quiz-btn" class="submit-all-btn"
                     style="display: none; background-color: #b8860b; border-color: #8b6508; margin-top: 10px;"
-                    onclick="goToQuizFromAR()">✨ 謎を解く（問題ページへ進む） ✨</button>
+                    onclick="goToQuizFromAR()">謎を解く (問題ページへ進む)</button>
 
-                <!-- マーカーが反応しにくい時のための救済ボタン（常に表示） -->
+                <!-- 救済ボタン -->
                 <button class="submit-all-btn"
                     style="background-color: #705342; border-color: #4a3b32; font-size: 0.9rem; padding: 10px; margin-top: 8px;"
-                    onclick="goToQuizFromAR()">（テスト用）読み込めない場合はこちらから進む</button>
+                    onclick="goToQuizFromAR()">(テスト用) 読み込めない場合はこちらから進む</button>
             </div>
         </div>
 
@@ -343,7 +344,7 @@
         <div id="quiz-form">
             <div
                 style="text-align: center; margin-bottom: 15px; color: #2e6b3e; font-weight: bold; font-size: 0.95rem;">
-                ✓ ARよつばラの力により、すべての謎が解放されました!
+                ☑ ARよつばラの力により、すべての謎が解放されました!
             </div>
             <div class="question-block">
                 <div class="q-title"><span class="q-icon">Q.01</span>第一の謎</div>
@@ -353,14 +354,15 @@
             </div>
             <div class="question-block">
                 <div class="q-title"><span class="q-icon">Q.02</span>第二の謎</div>
-                <p>円卓の集会に耳を澄ませ。<br>ひとつ、皿を掲げし大事な生命。<br>ふたつ、牙を剥くオオカミに狙われし耳長。<br>みっつ、競い走る者たち、そして「起きろ」と叫ばれる者。<br>――ならば、残されたもうひとつの円を統べる動物とは何か?
+                <p>
+                    円卓の集会に耳を澄ませ。<br>ひとつ、皿を掲げし大事な生命。<br>ふたつ、牙を剥くオオカミに狙われし耳長。<br>みっつ、競い走る者たち、そして「起きろ」と叫ばれる者。<br>ならば、残されたもうひとつの円を統べる動物とは何か?
                 </p>
                 <input type="text" id="ans2" placeholder="答えを入力">
                 <div id="msg2" class="message"></div>
             </div>
             <div class="question-block">
                 <div class="q-title"><span class="q-icon">Q.03</span>第三の謎</div>
-                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き <span style="font-family:'Cinzel',serif;">'N'</span> または「線(文字)」を見つけ出せ。
+                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き <span style="font-family:'Cinzel', serif;">'N'</span> または「線(文字)」を見つけ出せ。
                 </p>
                 <input type="text" id="ans3" placeholder="答えを入力">
                 <div id="msg3" class="message"></div>
@@ -378,20 +380,20 @@
         <!-- STEP 3: 全問正解後の合言葉 -->
         <div id="unlock-section">
             <h3 style="color: #2e6b3e; margin-top:0;">全問正解!最後の扉が開く</h3>
-            <p style="font-size:0.9rem;">すべての謎が解けました。時空を動かすひらがな3文字の合言葉(<strong>うつぼ</strong>)を入力してください。</p>
+            <p style="font-size:0.9rem;">すべての謎が解けました。時空を動かすひらがな3文字の合言葉 (<strong>うつぼ</strong>)を入力してください。</p>
             <input type="text" id="passcode" placeholder="ひらがなで入力">
             <button class="submit-all-btn" onclick="checkPasscode()">時空を動かす</button>
             <div id="passcode-msg" class="message" style="margin-top:8px;"></div>
         </div>
 
-        <!-- STEP 4: 最終画面 (ニュース & 薔薇バッチAR起動) -->
+        <!-- STEP 4: 最終画面(ニュース & 薔薇バッチAR起動) -->
         <div id="next-page-section">
             <h2>靭公園 時空速報ニュース</h2>
             <div class="news-box">
                 <div class="news-title">【特設:特別調査員へ告ぐ】</div>
                 <p>
                     大きな木がどうやらこの謎解きを終わらせる『ニュース』をするみたい。見に行ってみよう。<br><br>
-                    ニュースの名札の近くに薔薇のバッチがあるよ。<br>それをカメラでかざしてね！
+                    ニュースの名札の近くに薔薇のバッチがあるよ。<br>それをカメラでかざしてね!
                 </p>
             </div>
             <a href="#" class="ar-btn" onclick="startWebAR('rose'); return false;">薔薇のバッチARカメラを起動する</a>
@@ -402,7 +404,7 @@
         let html5QrCode = null;
         let currentActiveMode = 'yotsuba';
 
-        // QRリーダーを起動する関数
+        // QR リーダーを起動する関数
         function startQRScanner() {
             const readerDiv = document.getElementById('qr-reader');
             const startBtn = document.getElementById('start-qr-btn');
@@ -425,7 +427,7 @@
                         console.error("カメラの停止に失敗しました", err);
                     });
                 },
-                () => { }
+                (err) => { }
             );
         }
 
@@ -434,7 +436,6 @@
             currentActiveMode = mode;
             document.getElementById('inline-ar-container').style.display = 'block';
             document.getElementById('start-ar-btn').style.display = 'none';
-
             const sceneEl = document.getElementById('aframe-scene');
             const yotsubaTarget = document.getElementById('yotsuba-target');
             const roseTarget = document.getElementById('rose-target');
@@ -450,15 +451,12 @@
             }
         }
 
-        // 3D出現後にボタンを押すとARを閉じて元のサイト（謎解きページ）に戻る処理
+        // 3D出現後にボタンを押すとARを閉じて元のサイト(謎解きページ)に戻る処理
         function goToQuizFromAR() {
-            // カメラやARシーンを非表示にしてリソースを解放する
             const inlineContainer = document.getElementById('inline-ar-container');
             if (inlineContainer) {
                 inlineContainer.innerHTML = ""; // カメラの映像を完全に停止させる
             }
-
-            // ARセクションを隠して、元のVSCodeで確認している謎解き質問ページを表示する
             document.getElementById('ar-scan-section').style.display = 'none';
             document.getElementById('quiz-form').style.display = 'block';
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -513,7 +511,7 @@
             }
         }
 
-        // --- A-Frameの初期化完了後にイベントリスナーを安全に設定 ---
+        // A-Frameの初期化完了後にイベントリスナーを設定
         document.addEventListener('DOMContentLoaded', () => {
             const yotsubaTargetEntity = document.querySelector('#yotsuba-target');
             const roseTargetEntity = document.querySelector('#rose-target');

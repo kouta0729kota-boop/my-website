@@ -1,537 +1,423 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ストップ・ウォッチ・ガーデン ~よつばラで時空をもどせ! ~</title>
-    <link href="https://fonts.googleapis.com/css?family=Cinzel:wght@700&family=Zen+Maru+Gothic:wght@700&display=swap"
-        rel="stylesheet">
-    <!-- A-Frame ライブラリ -->
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <!-- MindAR for A-Frame ライブラリ -->
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    <!-- QRコードリーダー用ライブラリ (html5-qrcode) -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js"></script>
-    <style>
-        body {
-            font-family: "Zen Maru Gothic", sans-serif;
-            background-color: #3233b224;
-            color: #4a3b32;
-            margin: 0;
-            padding: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
-            overflow-x: hidden;
-        }
+ <meta charset="UTF-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1.0">
+ <title>ストップ・ウォッチ・ガーデン 〜よつばで時空をもどせ！〜</title>
+ <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700&family=Zen+Maru+Gothic:wght@700&display=swap" rel="stylesheet">
+ 
+ <style>
+ * {
+ box-sizing: border-box;
+ }
+ html, body {
+ margin: 0;
+ padding: 0;
+ background-color: #3b2c24 !important;
+ color: #4a3b32;
+ font-family: "Zen Maru Gothic", sans-serif;
+ height: auto !important;
+ min-height: 100vh;
+ overflow-y: auto !important;
+ }
+ body {
+ padding: 15px 15px 40px 15px;
+ }
+ .card-container {
+ width: 100%;
+ max-width: 550px;
+ background: #fcf4df;
+ border-radius: 6px;
+ box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(184, 134, 11, 0.15);
+ border: 6px solid #5a3825;
+ outline: 2px dashed #b8860b;
+ outline-offset: -5px;
+ padding: 18px 15px;
+ margin: 0 auto 20px auto;
+ }
+ .header-sub {
+ font-family: 'Cinzel', serif;
+ font-size: 0.8rem;
+ color: #68860b;
+ letter-spacing: 0.15em;
+ margin-bottom: 2px;
+ text-align: center;
+ }
+ h1 {
+ font-size: 1.35rem;
+ color: #4a2e18;
+ margin: 0 0 3px 0;
+ letter-spacing: 0.05em;
+ text-align: center;
+ text-shadow: 1px 1px 0px #edd5b3;
+ }
+ .sub-title {
+ text-align: center;
+ font-size: 0.8rem;
+ color: #705342;
+ margin-bottom: 12px;
+ font-weight: bold;
+ }
+ /* 画面の切り替え管理 */
+ .screen {
+ display: none !important;
+ }
+ .screen.active {
+ display: block !important;
+ }
+ /* AR専用画面 */
+ .ar-screen {
+ display: none;
+ position: fixed;
+ top: 0;
+ left: 0;
+ width: 100vw;
+ height: 100vh;
+ z-index: 9999;
+ background: #000;
+ }
+ .ar-screen.active {
+ display: block;
+ }
+ .action-btn {
+ width: 100%;
+ padding: 10px;
+ background-color: #2e6b3e;
+ color: #fff;
+ border: 2px solid #1e4628;
+ border-radius: 4px;
+ font-size: 0.95rem;
+ font-family: "Zen Maru Gothic", sans-serif;
+ font-weight: bold;
+ cursor: pointer;
+ box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+ text-align: center;
+ display: inline-block;
+ margin-top: 8px;
+ }
+ .action-btn:hover {
+ background-color: #1e4628;
+ }
+ .question-block {
+ background-color: #f7ebcc;
+ border: 2px solid #b8860b;
+ border-radius: 6px;
+ padding: 10px 12px;
+ margin-bottom: 10px;
+ }
+ .q-title {
+ font-size: 0.9rem;
+ color: #7a431d;
+ font-weight: bold;
+ margin-bottom: 4px;
+ display: flex;
+ align-items: center;
+ }
+ .q-icon {
+ background-color: #7a431d;
+ color: #fcf4df;
+ border-radius: 3px;
+ padding: 1px 5px;
+ font-size: 0.75rem;
+ margin-right: 5px;
+ font-family: 'Cinzel', serif;
+ }
+ p {
+ font-size: 0.85rem;
+ line-height: 1.4;
+ margin: 0 0 6px 0;
+ color: #3b2c24;
+ }
+ input[type="text"] {
+ width: 100%;
+ padding: 7px;
+ font-size: 0.9rem;
+ font-family: "Zen Maru Gothic", sans-serif;
+ background-color: #fffdf7;
+ border: 2px solid #b8860b;
+ border-radius: 4px;
+ margin-bottom: 4px;
+ color: #3b2c24;
+ text-align: center;
+ font-weight: bold;
+ }
+ input.correct-input {
+ background-color: #e5f2e5;
+ border-color: #2e6b3e;
+ color: #2e6b3e;
+ }
+ .message {
+ font-size: 0.75rem;
+ font-weight: bold;
+ text-align: center;
+ min-height: 1em;
+ }
+ .message.error { color: #a83232; }
+ .message.success { color: #2e6b3e; }
+ 
+ /* ロック解除セクション */
+ #unlock-section {
+ display: none;
+ background-color: #f7ebcc;
+ border: 2px solid #2e6b3e;
+ border-radius: 6px;
+ padding: 10px 12px;
+ text-align: center;
+ margin-top: 10px;
+ }
+ </style>
 
-        .flyer-card {
-            width: 100%;
-            max-width: 550px;
-            background: #fcf4df;
-            border-radius: 6px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), inset 0 0 40px rgba(184, 134, 11, 0.15);
-            border: 8px solid #35a382;
-            outline: 3px dashed #b8860b;
-            outline-offset: -6px;
-            padding: 30px 20px;
-            box-sizing: border-box;
-            position: relative;
-            z-index: 10;
-        }
+ <!-- A-Frame と MindAR のライブラリ -->
+ <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
+ <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+ <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
+ <script>
+ function showScreen(screenId) {
+ document.querySelectorAll('.screen, .ar-screen').forEach(s => {
+ s.classList.remove('active');
+ });
+ 
+ document.getElementById('ar-scene-container-1').innerHTML = "";
+ document.getElementById('ar-scene-container-2').innerHTML = "";
 
-        .flyer-header {
-            text-align: center;
-            border-bottom: 2px solid #68860b;
-            padding-bottom: 20px;
-            margin-bottom: 25px;
-        }
+ if (screenId === 'screen-ar-clover') {
+ initAR1();
+ } else if (screenId === 'screen-ar-ending') {
+ initAR2();
+ }
+ 
+ const targetEl = document.getElementById(screenId);
+ if (targetEl) {
+ targetEl.classList.add('active');
+ window.scrollTo({ top: 0, behavior: 'smooth' });
+ }
+ }
 
-        .header-sub {
-            font-family: 'Cinzel', serif;
-            font-size: 0.9rem;
-            color: #b8860b;
-            letter-spacing: 0.15em;
-            margin-bottom: 5px;
-        }
+ // 1つ目のAR（四つ葉）
+ function initAR1() {
+ const container = document.getElementById('ar-scene-container-1');
+ container.innerHTML = `
+ <a-scene mindar-image="imageTargetSrc: ./targets.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="width: 100%; height: 100%;">
+ <a-assets>
+ <a-asset-item id="avatarModel1" src="./7729a015a81275ac-v1.glb"></a-asset-item>
+ </a-assets>
+ <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+ <a-entity id="clover-target" mindar-image-target="targetIndex: 0">
+ <a-gltf-model src="#avatarModel1" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 180 0" animation-mixer="clip: *; loop: repeat; timeScale: 1;"></a-gltf-model>
+ </a-entity>
+ </a-scene>
+ `;
+ setTimeout(() => {
+ const target = document.querySelector('#clover-target');
+ const btn = document.querySelector('#ar-btn-container');
+ if (target) {
+ target.addEventListener('targetFound', () => {
+ btn.style.display = 'block';
+ });
+ }
+ }, 1000);
+ }
 
-        h1 {
-            font-size: 1.5rem;
-            color: #4a2e18;
-            margin: 0;
-            letter-spacing: 0.05em;
-            text-shadow: 1px 1px 0px #edd5b3;
-        }
+ // 2つ目のAR（最後のステージ：targets2.mind ＆ 3Dジェネレーター.glb）
+ function initAR2() {
+ const container = document.getElementById('ar-scene-container-2');
+ container.innerHTML = `
+ <a-scene mindar-image="imageTargetSrc: ./targets2.mind;" color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false" style="width: 100%; height: 100%;">
+ <a-assets>
+ <a-asset-item id="avatarModel2" src="3Dジェネレーター.glb"></a-asset-item>
+ </a-assets>
+ <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+ <a-entity id="ending-target" mindar-image-target="targetIndex: 0">
+ <a-gltf-model src="#avatarModel2" position="0 0 0" scale="0.5 0.5 0.5" rotation="0 180 0" animation-mixer="clip: *; loop: repeat; timeScale: 1;"></a-gltf-model>
+ </a-entity>
+ </a-scene>
+ `;
+ setTimeout(() => {
+ const target = document.querySelector('#ending-target');
+ const endingMsg = document.getElementById('ending-success-msg');
+ if (target) {
+ target.addEventListener('targetFound', () => {
+ endingMsg.style.display = 'block';
+ });
+ }
+ }, 1000);
+ }
 
-        .flyer-message {
-            font-size: 0.9rem;
-            color: #705342;
-            margin-top: 8px;
-            font-weight: bold;
-        }
+ const answers = { 1: "うま", 2: "たぬき", 3: "じてんしゃ", 4: "さくら" };
+ function checkAnswer(qNum) {
+ const userAns = document.getElementById('ans' + qNum).value.trim().toLowerCase();
+ const msg = document.getElementById('msg' + qNum);
+ const inputField = document.getElementById('ans' + qNum);
+ if (userAns === answers[qNum]) {
+ msg.textContent = "【正解！】";
+ msg.className = "message success";
+ inputField.classList.add('correct-input');
+ inputField.disabled = true;
+ checkAllCompleted();
+ } else {
+ msg.textContent = "【違います】";
+ msg.className = "message error";
+ }
+ }
 
-        .scanner-box {
-            background-color: #f7ebcc;
-            border: 2px solid #68860b;
-            border-radius: 8px;
-            padding: 20px;
-            margin-bottom: 20px;
-            text-align: center;
-        }
+ function checkAllCompleted() {
+ let allCorrect = true;
+ for (let i = 1; i <= 4; i++) {
+ const inputField = document.getElementById('ans' + i);
+ if (!inputField.disabled) {
+ allCorrect = false;
+ break;
+ }
+ }
+ if (allCorrect) {
+ const unlockSec = document.getElementById('unlock-section');
+ unlockSec.style.display = "block";
+ unlockSec.scrollIntoView({ behavior: 'smooth' });
+ }
+ }
 
-        .news-title {
-            color: #7a431d;
-            font-weight: bold;
-            font-size: 1.1rem;
-            border-bottom: 1px dashed #b8860b;
-            padding-bottom: 6px;
-            margin-bottom: 10px;
-            text-align: center;
-        }
-
-        .ar-instruction {
-            font-size: 0.95rem;
-            color: #4a2e18;
-            margin-bottom: 15px;
-            line-height: 1.6;
-            text-align: center;
-        }
-
-        .submit-all-btn {
-            width: 100%;
-            padding: 16px;
-            background-color: #2e6b3e;
-            color: #fcf4df;
-            border: 2px solid #1e4628;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-family: "Zen Maru Gothic", sans-serif;
-            font-weight: bold;
-            cursor: pointer;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            transition: all 0.1s;
-            margin-top: 10px;
-            letter-spacing: 0.05em;
-        }
-
-        .submit-all-btn:hover {
-            background-color: #245230;
-        }
-
-        #qr-scan-section {
-            display: block;
-        }
-
-        #ar-scan-section {
-            display: none;
-        }
-
-        #quiz-form {
-            display: none;
-        }
-
-        #unlock-section {
-            display: none;
-            background-color: #f7ebcc;
-            border: 2px dashed #b8860b;
-            border-radius: 8px;
-            padding: 20px;
-            text-align: center;
-            margin-top: 20px;
-        }
-
-        #next-page-section {
-            display: none;
-            text-align: left;
-            padding: 10px 0;
-        }
-
-        .question-block {
-            background-color: #fffdf7;
-            border: 2px solid #b8860b;
-            border-radius: 8px;
-            padding: 18px;
-            margin-bottom: 20px;
-        }
-
-        .q-title {
-            font-size: 1.05rem;
-            color: #7a431d;
-            font-weight: bold;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-        }
-
-        .q-icon {
-            background-color: #7a431d;
-            color: #fcf4df;
-            border-radius: 4px;
-            padding: 2px 8px;
-            font-size: 0.85rem;
-            margin-right: 8px;
-            font-family: 'Cinzel', serif;
-        }
-
-        .question-block p {
-            font-size: 0.98rem;
-            line-height: 1.7;
-            margin: 0 0 12px 0;
-            color: #3b2c24;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            font-size: 1rem;
-            font-family: "Zen Maru Gothic", sans-serif;
-            background-color: #fffdf7;
-            border: 2px solid #b8860b;
-            border-radius: 4px;
-            box-sizing: border-box;
-            margin-bottom: 8px;
-            color: #3b2c24;
-            text-align: center;
-            font-weight: bold;
-        }
-
-        input[type="text"]:focus {
-            outline: none;
-            border-color: #2e6b3e;
-            background-color: #fff;
-        }
-
-        input.correct-input {
-            background-color: #e5f2e5;
-            border-color: #2e6b3e;
-            color: #2e6b3e;
-        }
-
-        .message {
-            font-size: 0.85rem;
-            font-weight: bold;
-            text-align: center;
-            min-height: 1.2em;
-        }
-
-        .error {
-            color: #a83232;
-        }
-
-        .success {
-            color: #2e6b3e;
-        }
-
-        .news-box {
-            background-color: #fffdf7;
-            border: 2px solid #b8860b;
-            border-radius: 6px;
-            padding: 15px;
-            margin-bottom: 20px;
-            font-size: 0.95rem;
-            line-height: 1.8;
-        }
-
-        .ar-btn {
-            display: block;
-            width: 100%;
-            padding: 16px;
-            background-color: #2e6b3e;
-            color: #fff;
-            border: 2px solid #1e4628;
-            border-radius: 4px;
-            font-size: 1.1rem;
-            font-family: "Zen Maru Gothic", sans-serif;
-            font-weight: bold;
-            text-align: center;
-            text-decoration: none;
-            box-sizing: border-box;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
-            margin-top: 15px;
-            cursor: pointer;
-        }
-
-        #inline-ar-container {
-            display: none;
-            width: 100%;
-            height: 350px;
-            position: relative;
-            background: #000;
-            border-radius: 6px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-    </style>
+ function checkPasscode() {
+ const userPass = document.getElementById('input-passcode').value.trim();
+ const passMsg = document.getElementById('passcode-msg');
+ if (userPass === "うつぼ") {
+ passMsg.textContent = "正解! 最後のARへ進みます……";
+ passMsg.className = "message success";
+ setTimeout(() => {
+ showScreen('screen-ar-ending');
+ }, 1000);
+ } else {
+ passMsg.textContent = "合言葉が違います";
+ passMsg.className = "message error";
+ }
+ }
+ </script>
 </head>
-
 <body>
 
-    <!-- メインの謎解き手帖カード -->
-    <div class="flyer-card" id="main-content-card">
-        <div class="flyer-header">
-            <div class="header-sub">STOP WATCH GARDEN</div>
-            <h1>ストップ・ウォッチ・ガーデン</h1>
-            <div class="flyer-message">~ よつばラで時空をもどせ! ~</div>
-        </div>
+  <!-- 1. スタート画面 -->
+<div id="screen-start" class="screen active card-container">
+ <div class="header-sub">STOP WATCH GARDEN</div>
+ <h1>ストップ・ウォッチ・ガーデン</h1>
+ <div class="sub-title">〜よつばで時空をもどせ！〜</div>
+ <div style="background-color: #f7ebcc; border: 2px solid #b8860b; border-radius: 6px; padding: 10px 12px; text-align: center; margin-bottom: 12px;">
+ <p style="font-weight: bold; color: #7a431d; margin: 0 0 2px 0;">最初の四つ葉を読み込む</p>
+ <p style="font-size: 0.8rem; margin: 0;">看板にある最初の四つ葉の画像をカメラで読み取ってください。</p>
+ </div>
+ <button class="action-btn" onclick="showScreen('screen-ar-clover')">ARカメラを起動する</button>
+</div>
 
-        <!-- STEP 0: 最初に出現するQRコードリーダー読み取り画面 -->
-        <div id="qr-scan-section">
-            <div class="scanner-box">
-                <div class="news-title">最初のQRコード読み込み</div>
-                <p class="ar-instruction">手帖や看板にある最初のQRコードをカメラで読み取ってください。</p>
-                <div id="qr-reader" style="width: 100%; max-width: 400px; margin: 0 auto; display: none;"></div>
-                <button class="submit-all-btn" id="start-qr-btn" onclick="startQRScanner()">QR リーダーカメラを起動</button>
-            </div>
-        </div>
+<!-- 2. 四つ葉スキャン & 3D出現画面 -->
+<div id="screen-ar-clover" class="ar-screen">
+ <div id="ar-scene-container-1" style="width: 100%; height: 100%;"></div>
+ <button onclick="showScreen('screen-start')" style="position: absolute; top: 15px; left: 15px; z-index: 99999; background: #5a3825; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">戻る</button>
+ <div id="ar-btn-container" style="display: none; position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 80%; max-width: 400px; text-align: center;">
+ <button onclick="showScreen('screen-quiz')" style="background-color: #2e6b3e; color: #fff; border: 2px solid #1e4628; border-radius: 5px; padding: 12px; font-size: 1rem; font-family: 'Zen Maru Gothic', sans-serif; font-weight: bold; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; cursor: pointer;">
+ ☆四つ葉を発見！ 謎解きへ進む
+ </button>
+ </div>
+</div>
 
-        <!-- STEP 1: カード内にARカメラを埋め込むセクション -->
-        <div id="ar-scan-section">
-            <div class="scanner-box">
-                <div class="news-title">時空ロック中 (ARスキャン)</div>
-                <p class="ar-instruction">
-                    QRコード読込成功!<br>下の枠内にカメラを起動し、<strong>「四つばのクローバーの画像」</strong>にかざしてください。
-                </p>
+<!-- 3. 謎解き手帖画面 -->
+<div id="screen-quiz" class="screen card-container">
+ <div class="header-sub">PARK NAZOTOKI PROJECT</div>
+ <h1>公園エリア 謎解き手帖</h1>
+ <div class="sub-title">すべての謎を解いて合言葉のロックを解除しよう</div>
+ 
+ <!-- Q1 -->
+ <div class="question-block">
+ <div class="q-title"><span class="q-icon">Q.01</span>第一の謎</div>
+ <p>水辺でぷかぷか浮かぶラッコさんのそばで、パカパカ……休むことなく走りつづけているのは、だれかな？。</p>
+ <input type="text" id="ans1" placeholder="答えを入力">
+ <button onclick="checkAnswer(1)" style="width:100%; padding: 6px; background: #7a431d; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size:0.85rem;">この答えを判定</button>
+ <div id="msg1" class="message"></div>
+ </div>
 
-                <!-- カードの真ん中にインライン表示されるARカメラ領域 -->
-                <div id="inline-ar-container">
-                    <a-scene id="aframe-scene" embedded
-                        mindar-image="imageTargetSrc: targets.mind; filterMinCF:0.0001; filterBeta:0.001;"
-                        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
-                        <a-assets>
-                            <!-- ここに3Dモデル（glTF/glb）を登録します -->
-                            <a-asset-item id="yotsuba-model" src="7729a015a81275ac.glb"></a-asset-item>
-                        </a-assets>
-                        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+ <!-- Q2 -->
+ <div class="question-block">
+ <div class="q-title"><span class="q-icon">Q.02</span>第二の謎</div>
+ <p>まるいテーブルのまわりに、動物たちが大集合！ おおかみさんにねらわれちゃう耳の長いうさぎさんや、みんなでかけっこをする動物たち……もう一つにいる動物は？</p>
+ <input type="text" id="ans2" placeholder="答えを入力">
+ <button onclick="checkAnswer(2)" style="width:100%; padding:6px; background: #7a431d; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family: 'Zen Maru Gothic', sans-serif; font-size:0.85rem;">この答えを判定</button>
+ <div id="msg2" class="message"></div>
+ </div>
 
-                        <!-- モード1: よつばラターゲット -->
-                        <a-entity id="yotsuba-target" mindar-image-target="targetIndex: 0">
-                            <!-- 3Dモデルの配置 (スケールや位置、向きはモデルに合わせて調整してください) -->
-                            <a-gltf-model src="#yotsuba-model" position="0 0 0" scale="0.5 0.5 0.5"
-                                rotation="0 0 0"></a-gltf-model>
-                        </a-entity>
+ <!-- Q3 -->
+ <div class="question-block">
+ <div class="q-title"><span class="q-icon">Q.03</span>第三の謎</div>
+ <p>あら、人が固まっているよ...乗り物も動かない、赤ちゃんが載っているのともう一つはなに？</p>
+ <input type="text" id="ans3" placeholder="答えを入力">
+ <button onclick="checkAnswer(3)" style="width:100%; padding:6px; background:#7a431d; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family:'Zen Maru Gothic',sans-serif; font-size:0.85rem;">この答えを判定</button>
+ <div id="msg3" class="message"></div>
+ </div>
 
-                        <!-- モード2: 薔薇と時計の歯車ターゲット -->
-                        <a-entity id="rose-target" mindar-image-target="targetIndex: 0" visible="false">
-                            <a-sphere position="0 0 0" radius="0.15" color="#ff3366"
-                                material="emissive: #ff1493; emissiveIntensity: 0.8"
-                                animation="property: position; to: 0 0.4 0; dir: alternate; dur: 1200; loop: true"></a-sphere>
-                            <a-torus position="0 0 -0.2" radius="0.4" radius-tubular="0.03" color="#DAA520"
-                                roughness="0.2" metalness="0.9"
-                                animation="property: rotation; to: 0 0 360; dur: 4000; easing: linear; loop: true"></a-torus>
-                        </a-entity>
-                    </a-scene>
-                </div>
+ <!-- Q4 -->
+ <div class="question-block">
+ <div class="q-title"><span class="q-icon">Q.04</span>第四の謎</div>
+ <p>まっしろな壁のそばに、立っている人、杖をついたおじいちゃん、仲良しな親子がやってきたよ。みんなをやさしく見守るように、足元でかわいく咲いているピンクの花はなんだろう？</p>
+ <input type="text" id="ans4" placeholder="答えを入力">
+ <button onclick="checkAnswer(4)" style="width:100%; padding:6px; background:#7a431d; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family:'Zen Maru Gothic',sans-serif; font-size:0.85rem;">この答えを判定</button>
+ <div id="msg4" class="message"></div>
+ </div>
 
-                <!-- AR起動ボタン -->
-                <button id="start-ar-btn" class="submit-all-btn" onclick="startWebAR('yotsuba')">WebARカメラを起動する</button>
+ <!-- 4問全正解で出現するエリア -->
+ <div id="unlock-section">
+ <p style="font-size:0.85rem; font-weight: bold; color: #2e6b3e; margin:0 0 4px 0;">🎉 全問正解！合言葉の入力に進めます</p>
+ <p style="font-size:0.80rem; font-weight: bold; color: #a83232; margin:0 0 6px 0;">（合言葉：<span style="font-size: 0.95rem; text-decoration: underline;">うつぼ</span>）</p>
+ <button class="action-btn" onclick="showScreen('screen-passcode-input')">🔐 合言葉を入力するページへ進む</button>
+ </div>
+</div>
 
-                <!-- 検出後に現れる「謎を解く」ボタン -->
-                <button id="to-quiz-btn" class="submit-all-btn"
-                    style="display: none; background-color: #b8860b; border-color: #8b6508; margin-top: 10px;"
-                    onclick="goToQuizFromAR()">謎を解く (問題ページへ進む)</button>
+<!-- 5. 合言葉入力専用ページ -->
+<div id="screen-passcode-input" class="screen card-container">
+ <div class="header-sub">FINAL STAGE</div>
+ <h1>合言葉の入力</h1>
+ <div class="sub-title">すべての謎を解き明かしたあなたへ</div>
+ 
+ <div class="question-block" style="text-align: center;">
+ <p style="font-weight: bold; color: #7a431d; margin-bottom: 8px;">得られた合言葉を入力してください</p>
+ <input type="text" id="input-passcode" placeholder="合言葉を入力">
+ <button onclick="checkPasscode()" style="width:100%; background: #2e6b3e; color:#fff; border:none; border-radius:4px; cursor:pointer; font-family: 'Zen Maru Gothic', sans-serif; margin-top: 8px; padding: 8px; font-size:0.9rem; font-weight:bold;">合言葉を決定する</button>
+ <div id="passcode-msg" class="message" style="margin-top: 6px;"></div>
+ </div>
+ <button onclick="showScreen('screen-quiz')" style="width:100%; padding:8px; background:#7a431d; color:#fff; border:none; border-radius:4px; font-weight:bold; cursor:pointer; font-family: 'Zen Maru Gothic', sans-serif; margin-top: 8px; font-size:0.9rem;">謎解き手帖に戻る</button>
+</div>
 
-                <!-- 救済ボタン -->
-                <button class="submit-all-btn"
-                    style="background-color: #705342; border-color: #4a3b32; font-size: 0.9rem; padding: 10px; margin-top: 8px;"
-                    onclick="goToQuizFromAR()">(テスト用) 読み込めない場合はこちらから進む</button>
-            </div>
-        </div>
+<!-- 6. 合言葉入力後の最後のAR読み込み画面 -->
+<div id="screen-ar-ending" class="ar-screen">
+ <div id="ar-scene-container-2" style="width: 100%; height: 100%;"></div>
+ <button onclick="showScreen('screen-passcode-input')" style="position: absolute; top: 15px; left: 15px; z-index: 99999; background: #5a3825; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 0.85rem;">戻る</button>
+ 
+ <div id="ending-success-msg" style="display: none; position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 99999; width: 80%; max-width: 400px; text-align: center;">
+ <!-- ニュースに進むボタン（クリックすると画面7のニュースページへ切り替わる） -->
+ <button class="clear-news-btn" onclick="showScreen('screen-news')" style="background-color: #2e6b30; color: #ffffff; border: 2px solid #ffffff; border-radius: 6px; padding: 12px; font-size: 0.9rem; font-weight: bold; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.5); width: 100%; font-family: 'Zen Maru Gothic', sans-serif; line-height: 1.5;">
+    時空がもどった！クリアおめでとう！<br class="sp-br">ニュースに進む
+  </button>
+ </div>
+</div>
 
-        <!-- STEP 2: クイズ問題 -->
-        <div id="quiz-form">
-            <div
-                style="text-align: center; margin-bottom: 15px; color: #2e6b3e; font-weight: bold; font-size: 0.95rem;">
-                ☑ ARよつばラの力により、すべての謎が解放されました!
-            </div>
-            <div class="question-block">
-                <div class="q-title"><span class="q-icon">Q.01</span>第一の謎</div>
-                <p>水辺の賢者、ラッコ。その傍らに佇み、休むことなく疾走し続ける「者」の名を記せ。</p>
-                <input type="text" id="ans1" placeholder="答えを入力">
-                <div id="msg1" class="message"></div>
-            </div>
-            <div class="question-block">
-                <div class="q-title"><span class="q-icon">Q.02</span>第二の謎</div>
-                <p>
-                    円卓の集会に耳を澄ませ。<br>ひとつ、皿を掲げし大事な生命。<br>ふたつ、牙を剥くオオカミに狙われし耳長。<br>みっつ、競い走る者たち、そして「起きろ」と叫ばれる者。<br>ならば、残されたもうひとつの円を統べる動物とは何か?
-                </p>
-                <input type="text" id="ans2" placeholder="答えを入力">
-                <div id="msg2" class="message"></div>
-            </div>
-            <div class="question-block">
-                <div class="q-title"><span class="q-icon">Q.03</span>第三の謎</div>
-                <p>三本の平行線が織りなす空間。その最も右側に位置するが如き <span style="font-family:'Cinzel', serif;">'N'</span> または「線(文字)」を見つけ出せ。
-                </p>
-                <input type="text" id="ans3" placeholder="答えを入力">
-                <div id="msg3" class="message"></div>
-            </div>
-            <div class="question-block">
-                <div class="q-title"><span class="q-icon">Q.04</span>第四の謎</div>
-                <p>とある施設の白き壁面。そこには起立する者、杖をつく者、そして並び立つ親子の姿が刻まれている。<br>その足元に寄り添うように咲き誇る、鮮やかなピンクの花の名は?</p>
-                <input type="text" id="ans4" placeholder="答えを入力">
-                <div id="msg4" class="message"></div>
-            </div>
-            <button class="submit-all-btn" onclick="checkAllAnswers()"
-                style="background-color: #7a431d; border-color: #5a3825;">すべての答えを判定する</button>
-        </div>
+<!-- 7. ニュース＆クリア記念ページ（新しく追加した画面） -->
+<div id="screen-news" class="screen card-container">
+ <div class="header-sub">SPECIAL NEWS & REPORT</div>
+ <h1>靱公園の時間が再び動き出す！</h1>
+ <div class="sub-title">〜平和な日常の復活〜</div>
+ 
+ <div class="question-block" style="text-align: center; margin-bottom: 12px;">
+ <p style="font-weight: bold; color: #7a431d; margin-bottom: 8px; line-height: 1.6;">
+ 調査員たちの活躍により、すべての時空異常が無事に解除されました！<br>
+ 石像と化していた人々に笑顔が戻り、公園に温かな日常が蘇ります。
+ </p>
+ <div style="background: #fffdf7; border: 2px solid #b8860b; border-radius: 4px; padding: 10px; margin-top: 10px;">
+ <p style="font-size: 0.8rem; color: #2e6b3e; font-weight: bold; margin: 0;">
+ 【時空同期完了：【時】【刻】【動】】<br>
+ ご参加いただき本当にありがとうございました！
+ </p>
+ </div>
+ </div>
 
-        <!-- STEP 3: 全問正解後の合言葉 -->
-        <div id="unlock-section">
-            <h3 style="color: #2e6b3e; margin-top:0;">全問正解!最後の扉が開く</h3>
-            <p style="font-size:0.9rem;">すべての謎が解けました。時空を動かすひらがな3文字の合言葉 (<strong>うつぼ</strong>)を入力してください。</p>
-            <input type="text" id="passcode" placeholder="ひらがなで入力">
-            <button class="submit-all-btn" onclick="checkPasscode()">時空を動かす</button>
-            <div id="passcode-msg" class="message" style="margin-top:8px;"></div>
-        </div>
+ <button onclick="showScreen('screen-start')" class="action-btn" style="background: #7a431d;">
+ 最初の画面に戻る
+ </button>
+</div>
 
-        <!-- STEP 4: 最終画面(ニュース & 薔薇バッチAR起動) -->
-        <div id="next-page-section">
-            <h2>靭公園 時空速報ニュース</h2>
-            <div class="news-box">
-                <div class="news-title">【特設:特別調査員へ告ぐ】</div>
-                <p>
-                    大きな木がどうやらこの謎解きを終わらせる『ニュース』をするみたい。見に行ってみよう。<br><br>
-                    ニュースの名札の近くに薔薇のバッチがあるよ。<br>それをカメラでかざしてね!
-                </p>
-            </div>
-            <a href="#" class="ar-btn" onclick="startWebAR('rose'); return false;">薔薇のバッチARカメラを起動する</a>
-        </div>
-    </div>
-
-    <script>
-        let html5QrCode = null;
-        let currentActiveMode = 'yotsuba';
-
-        // QR リーダーを起動する関数
-        function startQRScanner() {
-            const readerDiv = document.getElementById('qr-reader');
-            const startBtn = document.getElementById('start-qr-btn');
-            readerDiv.style.display = 'block';
-            startBtn.style.display = 'none';
-            html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start(
-                { facingMode: "environment" },
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                (decodedText) => {
-                    alert("読み取った値: " + decodedText);
-                    html5QrCode.stop().then(() => {
-                        if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
-                            window.location.href = decodedText;
-                        } else {
-                            document.getElementById('qr-scan-section').style.display = 'none';
-                            document.getElementById('ar-scan-section').style.display = 'block';
-                        }
-                    }).catch(err => {
-                        console.error("カメラの停止に失敗しました", err);
-                    });
-                },
-                (err) => { }
-            );
-        }
-
-        // カード内にWebARカメラを起動する
-        function startWebAR(mode) {
-            currentActiveMode = mode;
-            document.getElementById('inline-ar-container').style.display = 'block';
-            document.getElementById('start-ar-btn').style.display = 'none';
-            const sceneEl = document.getElementById('aframe-scene');
-            const yotsubaTarget = document.getElementById('yotsuba-target');
-            const roseTarget = document.getElementById('rose-target');
-
-            if (mode === 'rose') {
-                sceneEl.setAttribute('mindar-image', 'imageTargetSrc: ./assets/rose-marker.mind;');
-                yotsubaTarget.setAttribute('visible', 'false');
-                roseTarget.setAttribute('visible', 'true');
-            } else {
-                sceneEl.setAttribute('mindar-image', 'imageTargetSrc: targets.mind;');
-                yotsubaTarget.setAttribute('visible', 'true');
-                roseTarget.setAttribute('visible', 'false');
-            }
-        }
-
-        // 3D出現後にボタンを押すとARを閉じて元のサイト(謎解きページ)に戻る処理
-        function goToQuizFromAR() {
-            const inlineContainer = document.getElementById('inline-ar-container');
-            if (inlineContainer) {
-                inlineContainer.innerHTML = ""; // カメラの映像を完全に停止させる
-            }
-            document.getElementById('ar-scan-section').style.display = 'none';
-            document.getElementById('quiz-form').style.display = 'block';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        // 謎解きの答え
-        const answers = {
-            1: "うま",
-            2: "たぬき",
-            3: "n",
-            4: "さくら"
-        };
-
-        function checkAllAnswers() {
-            let allCorrect = true;
-            for (let i = 1; i <= 4; i++) {
-                const userAns = document.getElementById('ans' + i).value.trim().toLowerCase();
-                const msg = document.getElementById('msg' + i);
-                const inputField = document.getElementById('ans' + i);
-                if (userAns === answers[i]) {
-                    msg.textContent = "【正解】";
-                    msg.className = "message success";
-                    inputField.classList.add('correct-input');
-                    inputField.disabled = true;
-                } else {
-                    msg.textContent = "【不正解または空欄です】";
-                    msg.className = "message error";
-                    allCorrect = false;
-                }
-            }
-            if (allCorrect) {
-                document.getElementById('unlock-section').style.display = 'block';
-                document.getElementById('unlock-section').scrollIntoView({ behavior: 'smooth' });
-            }
-        }
-
-        function checkPasscode() {
-            const passcodeVal = document.getElementById('passcode').value.trim();
-            const passcodeMsg = document.getElementById('passcode-msg');
-            if (passcodeVal === "うつぼ") {
-                passcodeMsg.textContent = "合言葉一致!時空が動き出します!";
-                passcodeMsg.className = "message success";
-                setTimeout(() => {
-                    document.getElementById('quiz-form').style.display = 'none';
-                    document.getElementById('unlock-section').style.display = 'none';
-                    document.getElementById('next-page-section').style.display = 'block';
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                }, 800);
-            } else {
-                passcodeMsg.textContent = "合言葉が違います (ひらがな3文字だよ)";
-                passcodeMsg.className = "message error";
-            }
-        }
-
-        // A-Frameの初期化完了後にイベントリスナーを設定
-        document.addEventListener('DOMContentLoaded', () => {
-            const yotsubaTargetEntity = document.querySelector('#yotsuba-target');
-            const roseTargetEntity = document.querySelector('#rose-target');
-
-            if (yotsubaTargetEntity) {
-                yotsubaTargetEntity.addEventListener('targetFound', () => {
-                    if (currentActiveMode !== 'yotsuba') return;
-                    console.log("よつばラマーカー検出: 謎を解くボタン出現");
-                    document.getElementById('to-quiz-btn').style.display = 'block';
-                });
-            }
-
-            if (roseTargetEntity) {
-                roseTargetEntity.addEventListener('targetFound', () => {
-                    if (currentActiveMode !== 'rose') return;
-                    console.log("バラのマーカー検出");
-                });
-            }
-        });
-    </script>
 </body>
-
 </html>
